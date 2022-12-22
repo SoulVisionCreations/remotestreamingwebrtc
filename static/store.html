@@ -1,0 +1,283 @@
+<html>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
+</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+<body>
+  <div>
+    <div id="localSessionDescription"></div>
+    <div id="remoteSessionDescription"></div>
+    <div id="remoteVideos" ></div>
+    <!-- <div id="div"></div> -->
+</body>
+<script>
+  var link
+  function initialize(a) {
+    link = a
+  }
+  console.log("hello")
+  //var socket = new WebSocket("ws://localhost:8080/todo");
+  //import { w3cwebsocket } from "websocket"
+  //var WebSocketClient = require('websocket').client;
+ var id = Math.floor(Math.random() * 100001);
+ console.log("id is ",id);
+//  let width = document.getElementById("remoteVideos").screen.availWidth;
+//  let height = document.getElementById("remoteVideos").offsetHeight;
+let height = window.innerHeight;
+//  let width = document.getElementById("remoteVideos").offsetWidth;
+let width = window.innerWidth;
+ console.log("Ratio is : ", width, "x", height);
+ let headers = new Headers();
+ headers.append('Access-Control-Allow-Origin', '*');
+	width="681";
+	height="734";
+ fetch("http://43.205.12.192:8090/get/?id="+id+"&height="+height+"&width="+width,{headers:headers})
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data.port);
+     var port =data.port
+    // var port = 8080;
+console.log("down fetch")
+  let p1 = 8080;
+  const WS_URL1 = "ws://43.205.12.192:"+port+"/link";
+  const ws1 = new WebSocket(WS_URL1);
+  ws1.onopen = function () {
+    console.log("connected in above")
+    // fetch("/get")
+    //   .then((response) => (response.json()))
+    //   .then((data) => {
+    //     console.log(data.link);
+    let params = (new URL(document.location)).searchParams;
+        //let link = params.get("link");
+        //let finalLink = link.substr(1, link.length-2)
+        // console.log(finalLink)
+		    ws1.send("https://www.youtube.com/watch?v=LyUDGlgaspU");
+       // ws1.send("https://orion-dev.avataar.me/engine/aman/index.html?ar=0&mode=sceneEditor&tenantId=AVTR-TNT-t8mv4evu&productId=175&env=local&isMultiSku=true");
+		 // ws1.send("https://orion-dev.avataar.me/engine/bike-exp-6/index.html?ar=0&mode=sceneEditor&tenantId=AVTR-TNT-t8mv4evu&productId=175&env=local&isMultiSku=true")
+	 // ws1.send("https://dev-air.avataar.me/?id=62d0fb50cacb4c0c012523dd");
+        // ws1.send("https://threejs.org/examples/#webgl_animation_keyframes");
+       //  ws1.send("https://www.bajajauto.com/bajaj-eshowroom");
+		  //ws1.send("https://192.168.7.186:3000/?ar=0&tenantId=AVTR-TNT-t8mv4evu&productId=175&env=local");
+        // ws1.send(height);
+        // ws1.send(width);
+        //ws1.send("https://threejs.org/examples/#webgl_animation_keyframes");
+        //ws1.send("https://testdrive-archive.azurewebsites.net/performance/fishbowl/");
+        // ;
+    //   });
+    //    // ws1.send("link ",link)
+  };
+  ws1.onmessage = function (e) {
+    console.log("reveived msg", e)
+  };
+  const WS_URL3 = "ws://43.205.12.192:"+port+"/sdp";
+  const ws3 = new WebSocket(WS_URL3);
+  ws3.onopen = function () {
+    console.log("connected in input")
+  };
+  ws3.onmessage = function (e) {
+    console.log("reveived msg in input 3", e)
+    window.startSession(e.data)
+  };
+  const WS_URL2 = "ws://43.205.12.192:"+port+"/input";
+  const ws2 = new WebSocket(WS_URL2);
+  ws2.onopen = function () {
+    console.log("connected in input")
+  };
+  ws2.onmessage = function (e) {
+    console.log("reveived msg in input", e)
+  };
+  //ws1.send("hello")
+  let pc = new RTCPeerConnection({
+    iceServers: [{
+      urls: 'stun:stun.l.google.com:19302'
+    }]
+  })
+  let log = msg => {
+    //document.getElementById('div').innerHTML += msg + '<br>'
+  }
+  var first = true;
+  //document.getElementById("remoteVideos").onclick = function(event) { alert(event);console.log("clicked",event); }
+  var xoffset = 0, yoffset = 0;
+  // window.onclick = function(event) {
+  // var msg={"x":event.clientX-xoffset,"y":event.clientY-yoffset,"type":"click"}
+  // var str=JSON.stringify(msg)
+  // console.log("click",event)
+  // ws2.send(str);
+  // //ws2.send("hello");
+  // }
+  var mousedown = false;
+  var xstart, ystart;
+  window.onmouseup = function (event) {
+    mousedown = false;
+    var msg = { "x": event.clientX - xoffset, "y": event.clientY - yoffset, "type": "mouseup" }
+    var str = JSON.stringify(msg)
+    //console.log(typeof(msg),msg,typeof(str),str)
+    console.log("mouse up ", event);
+    ws2.send(str);
+    //ws2.send("hello");
+    if (event.clientY == ystart && event.clientX == xstart) {
+      var msg = { "x": event.clientX - xoffset, "y": event.clientY - yoffset, "type": "click" }
+      var str = JSON.stringify(msg)
+      //console.log("click",event)
+      //ws2.send(str);
+      //ws2.send("hello");
+    }
+  }
+document.addEventListener('keydown', function(event) {
+    console.log("pressing keyboard",event);
+    var msg = { "x": event.key,"type": "key" }
+      var str = JSON.stringify(msg)
+      // console.log(typeof(msg),msg,typeof(str),str)
+      ws2.send(str);
+});	      
+  window.onmousedown = function (event) {
+    if (true) {
+      var msg = { "x": event.clientX - xoffset, "y": event.clientY - xoffset, "type": "mousemove" }
+      var str = JSON.stringify(msg)
+      // console.log(typeof(msg),msg,typeof(str),str)
+      console.log("mouse mov start ", event);
+      ws2.send(str);
+      //ws2.send("hello");
+    }
+    mousedown = true;
+    console.log("waiting")
+    xstart = event.clientX; ystart = event.clientY;
+    var msg = { "x": event.clientX - xoffset, "y": event.clientY - yoffset, "type": "mousedown" }
+    var str = JSON.stringify(msg)
+    // console.log(typeof(msg),msg,typeof(str),str)
+    console.log("mouse down ", event);
+    ws2.send(str);
+    //ws2.send("hello");
+  }
+  ontouchstart = function (event) {
+     console.log("touchstaatt",event);
+     console.log("waiting")
+    var msg = { "x": event.touches[0].clientX - xoffset, "y": event.touches[0].clientY - yoffset, "type": "mousedown" }
+    var str = JSON.stringify(msg)
+    // console.log(typeof(msg),msg,typeof(str),str)
+    console.log("mouse down ", event);
+    ws2.send(str);
+      //ws2.send("hello");
+    }
+    ontouchmove = function (event) {
+     console.log("touchmove",event);
+      //ws2.send("hello");
+      var msg = { "x": event.touches[0].clientX - xoffset, "y": event.touches[0].clientY - xoffset, "type": "mousemove" }
+      var str = JSON.stringify(msg)
+      // console.log(typeof(msg),msg,typeof(str),str)
+      console.log("mouse mov start ", event);
+      ws2.send(str);
+    }
+    ontouchend = function (event) {
+     console.log("touchmove",event);
+     var msg = { "x": 8 - xoffset, "y": 9- yoffset, "type": "mouseup" }
+    var str = JSON.stringify(msg)
+    //console.log(typeof(msg),msg,typeof(str),str)
+    console.log("mouse up ", event);
+    ws2.send(str);
+      //ws2.send("hello");
+    }
+  var dx = 0, dy = 0, dz = 0;
+  function mousewheelsend() {
+    if (dy != 0) {
+      var msg = { "x": dx, "y": dy, "z": dz, "type": "scroll" }
+      dx = 0; dy = 0; dz = 0;
+      var str = JSON.stringify(msg)
+      // console.log(typeof(msg),msg,typeof(str),str)
+      console.log("mouse wheel start ", event);
+      ws2.send(str);
+    }
+  }
+  setInterval(mousewheelsend, 100);
+  window.onwheel = function (event) {
+    dx += event.deltaX; dy += event.deltaY; dz += event.deltaZ;
+  }
+  window.onmousemove = function (event) {
+    if (mousedown) {
+      var msg = { "x": event.clientX - xoffset, "y": event.clientY - xoffset, "type": "mousemove" }
+      var str = JSON.stringify(msg)
+      // console.log(typeof(msg),msg,typeof(str),str)
+      console.log("mouse mov start ", event);
+      ws2.send(str);
+      //ws2.send("hello");
+    }
+  }
+  pc.ontrack = function (event) {
+    var el = document.createElement(event.track.kind)
+	console.log("aman ", el)	  
+   // el.style.width = "100%";
+    //el.style.height = "100%"
+    el.srcObject = event.streams[0]
+    el.muted = true
+    el.autoplay = "autoplay"
+    el.controls = false
+    //el.disableVideoPlayPauseClick = true
+    //el.play()
+    //el.requestFullscreen();
+    document.getElementById('remoteVideos').appendChild(el)
+    //document.getElementById('remoteVideos').requestFullscreen();
+    //el.play()
+    if (first) {
+      first = false
+      //el.play()
+    }
+    console.log("aman", event.track.kind)
+    // document.getElementById("myVideo").srcObject=event.streams[0]
+    // console.log(event)
+    //document.getElementById("myVideo").controls =false;
+    //document.getElementById("myVideo").play()
+  }
+  console.log("aman", window.screen.width,window.screen.height);
+  pc.oniceconnectionstatechange = e => log(pc.iceConnectionState)
+  pc.onicecandidate = event => {
+    if (event.candidate === null) {
+      document.getElementById('localSessionDescription').value = btoa(JSON.stringify(pc.localDescription))
+      console.log(btoa(JSON.stringify(pc.localDescription)))
+      setTimeout(function () {
+        ws3.send(btoa(JSON.stringify(pc.localDescription)))
+        //ws1.send("hello")
+        console.log("sending")
+      }, 2000);
+    }
+  }
+  // Offer to receive 1 audio, and 1 video track
+  pc.addTransceiver('video', {
+    'direction': 'sendrecv'
+  })
+  pc.addTransceiver('audio', {
+    'direction': 'sendrecv'
+  })
+  pc.createOffer().then(d => pc.setLocalDescription(d)).catch(log)
+  window.startSession = (sd) => {
+    //let sd = document.getElementById('remoteSessionDescription').value
+    console.log("application sdp", sd)
+    if (sd === '') {
+      return alert('Session Description must not be empty')
+    }
+    try {
+      pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(atob(sd))))
+    } catch (e) {
+      alert(e)
+    }
+  }
+  window.copySDP = () => {
+    let browserSDP = document.getElementById('localSessionDescription')
+    console.log("browser sdp", browserSDP)
+    browserSDP.focus();
+    browserSDP.select();
+    try {
+      var successful = document.execCommand('copy');
+      var msg = successful ? 'successful' : 'unsuccessful';
+      log('Copying SDP was ' + msg);
+    } catch (err) {
+      log('Oops, unable to copy SDP ' + err);
+    }
+  }
+}
+      )
+      .catch(err => console.log('err in fetch is ', err));
+</script>
+</html>
